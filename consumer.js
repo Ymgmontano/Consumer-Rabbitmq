@@ -26,9 +26,8 @@ async function consumeMessages() {
       if (message !== null) {
         const messageContent = message.content.toString();
         console.log('Mensaje recibido:', messageContent);
-
         try {
-          const apiUrl = 'http://127.0.0.1:3001/video';
+          const apiUrl = 'http://127.0.0.1:3001/Contact';
           const options = {
             method: 'POST',
             body: messageContent, // Enviar el contenido del mensaje tal como se recibió
@@ -38,8 +37,12 @@ async function consumeMessages() {
           };
 
           const response = await fetch(apiUrl, options);
-          const data = await response.json();
-          console.log('Respuesta de la API:', data);
+          if (response.headers.get('content-type').includes('application/json')) {
+            const data = await response.json();
+            console.log('Respuesta de la API:', data);
+          } else {
+            console.error('La respuesta no es JSON:', await response.text());
+          }
 
           // Eliminar el mensaje de la cola una vez procesado
           channel.ack(message);
